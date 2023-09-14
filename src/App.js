@@ -7,12 +7,15 @@ import Error from "./Components/Error";
 import Start from "./Components/Start";
 import NextButton from "./Components/NextButton";
 import Progress from "./Components/Progress";
+import Finish from "./Components/Finish";
+
 const initialState = {
   questions: [],
   status: "loading",
   index: 0,
   answer: null,
   points: 0,
+  highScore: 0,
 };
 
 const reducer = (state, action) => {
@@ -27,6 +30,13 @@ const reducer = (state, action) => {
       return { ...state, questions: state.questions, status: "active" };
     case "nextQuestion":
       return { ...state, index: state.index + 1, answer: null };
+    case "finish":
+      return {
+        ...state,
+        status: "finish",
+        highScore:
+          state.points > state.highScore ? state.points : state.highScore,
+      };
     case "newAnswer":
       return {
         ...state,
@@ -38,21 +48,19 @@ const reducer = (state, action) => {
   }
 };
 function App() {
-  const [{ questions, status, index, answer, points }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
-
+  const [{ questions, status, index, answer, points, highScore }, dispatch] =
+    useReducer(reducer, initialState);
+  console.log(status);
   const activeStatusHandler = () => {
     dispatch({ type: "start" });
   };
 
-  const handlerAnswerQuestion = (answer, correctAnswer) => {
+  const handlerAnswerQuestion = (answer, correctAnswer, auestionPoints) => {
     dispatch({
       type: "newAnswer",
       payload: {
         answer: answer,
-        points: answer === correctAnswer ? points + 10 : points,
+        points: answer === correctAnswer ? points + auestionPoints : points,
       },
     });
   };
@@ -99,8 +107,16 @@ function App() {
               onAnswer={handlerAnswerQuestion}
               answer={answer}
             />
-            <NextButton dispatch={dispatch} answer={answer} />
+            <NextButton
+              dispatch={dispatch}
+              answer={answer}
+              index={index}
+              numQuestions={questions.length}
+            />
           </>
+        )}
+        {status === "finish" && (
+          <Finish points={points} highscore={highScore} />
         )}
       </Main>
     </div>

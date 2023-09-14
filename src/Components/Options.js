@@ -2,7 +2,7 @@ import React from "react";
 
 const Options = ({ question, onAnswer, answer, points, handlerpagination }) => {
   const hanlder = (index) => {
-    onAnswer(index, question.correctOption);
+    onAnswer(index, question.correctOption, question.points);
   };
   return (
     <div className="options">
