@@ -43,6 +43,8 @@ const reducer = (state, action) => {
         answer: action.payload.answer,
         points: action.payload.points,
       };
+    case "restart":
+      return { ...initialState, questions: state.questions, status: "loading" };
     default:
       return state;
   }
@@ -116,7 +118,7 @@ function App() {
           </>
         )}
         {status === "finish" && (
-          <Finish points={points} highscore={highScore} />
+          <Finish points={points} highscore={highScore} dispatch={dispatch} />
         )}
       </Main>
     </div>
