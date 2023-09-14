@@ -1,23 +1,56 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useReducer } from "react";
 
+import Header from "./Components/Header";
+import Main from "./Components/Main";
+import Loader from "./Components/Loader";
+import Error from "./Components/Error";
+import Start from "./Components/Start";
+const initialState = {
+  questions: [],
+  status: "loading",
+};
+
+const reducer = (state, action) => {
+  const { type } = action;
+
+  switch (type) {
+    case "dataRecieved":
+      return { ...state, questions: action.payload, status: "ready" };
+    case "dataFailed":
+      return { ...state, questions: state.questions, status: "error" };
+    default:
+      return state;
+  }
+};
 function App() {
+  const [{ questions, status }, dispatch] = useReducer(reducer, initialState);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/questions");
+
+        if (!res.status) {
+          throw new Error("something went wrong");
+        }
+        const data = await res.json();
+
+        dispatch({ type: "dataRecieved", payload: data });
+      } catch (err) {
+        dispatch({ type: "dataFailed" });
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <Header />
+      <Main>
+        {status === "loading" && <Loader />}
+        {status === "error" && <Error />}
+        {status === "ready" && <Start questions={questions} />}
+      </Main>
     </div>
   );
 }
