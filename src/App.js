@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from "react";
-
+import Questions from "./Components/Questions";
 import Header from "./Components/Header";
 import Main from "./Components/Main";
 import Loader from "./Components/Loader";
@@ -8,6 +8,9 @@ import Start from "./Components/Start";
 const initialState = {
   questions: [],
   status: "loading",
+  index: 0,
+  answer: null,
+  points: 0,
 };
 
 const reducer = (state, action) => {
@@ -18,12 +21,39 @@ const reducer = (state, action) => {
       return { ...state, questions: action.payload, status: "ready" };
     case "dataFailed":
       return { ...state, questions: state.questions, status: "error" };
+    case "start":
+      return { ...state, questions: state.questions, status: "active" };
+
+    case "newAnswer":
+      return {
+        ...state,
+        answer: action.payload.answer,
+        points: action.payload.points,
+      };
     default:
       return state;
   }
 };
 function App() {
-  const [{ questions, status }, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status, index, answer, points }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
+
+  const activeStatusHandler = () => {
+    dispatch({ type: "start" });
+  };
+
+  const handlerAnswerQuestion = (answer, correctAnswer) => {
+    dispatch({
+      type: "newAnswer",
+      payload: {
+        answer: answer,
+        points: answer === correctAnswer ? points + 10 : points,
+      },
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -49,7 +79,18 @@ function App() {
       <Main>
         {status === "loading" && <Loader />}
         {status === "error" && <Error />}
-        {status === "ready" && <Start questions={questions} />}
+        {status === "ready" && (
+          <Start questions={questions} onStart={activeStatusHandler} />
+        )}
+        {status === "active" && (
+          <Questions
+            question={questions[index]}
+            onAnswer={handlerAnswerQuestion}
+            answer={answer}
+            points={points}
+            handlerpagination={handlerpagination}
+          />
+        )}
       </Main>
     </div>
   );
