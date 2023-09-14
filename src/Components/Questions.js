@@ -9,7 +9,6 @@ const Questions = ({
 }) => {
   return (
     <>
-      <h4>{question.question}</h4>
       <Options
         question={question}
         onAnswer={onAnswer}

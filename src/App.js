@@ -5,6 +5,8 @@ import Main from "./Components/Main";
 import Loader from "./Components/Loader";
 import Error from "./Components/Error";
 import Start from "./Components/Start";
+import NextButton from "./Components/NextButton";
+import Progress from "./Components/Progress";
 const initialState = {
   questions: [],
   status: "loading",
@@ -23,7 +25,8 @@ const reducer = (state, action) => {
       return { ...state, questions: state.questions, status: "error" };
     case "start":
       return { ...state, questions: state.questions, status: "active" };
-
+    case "nextQuestion":
+      return { ...state, index: state.index + 1, answer: null };
     case "newAnswer":
       return {
         ...state,
@@ -83,13 +86,21 @@ function App() {
           <Start questions={questions} onStart={activeStatusHandler} />
         )}
         {status === "active" && (
-          <Questions
-            question={questions[index]}
-            onAnswer={handlerAnswerQuestion}
-            answer={answer}
-            points={points}
-            handlerpagination={handlerpagination}
-          />
+          <>
+            <Progress
+              numOfQuestions={questions.length}
+              index={index}
+              points={points}
+              questions={questions}
+              answer={answer}
+            />
+            <Questions
+              question={questions[index]}
+              onAnswer={handlerAnswerQuestion}
+              answer={answer}
+            />
+            <NextButton dispatch={dispatch} answer={answer} />
+          </>
         )}
       </Main>
     </div>
